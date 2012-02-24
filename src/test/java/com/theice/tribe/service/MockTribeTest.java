@@ -181,10 +181,30 @@ public class MockTribeTest {
 		assertEquals(traders.next().getProperty("tribeId"), "akollegger");
 
 	}
+	
+	@Test
+	public void shouldFindWellKnownTraderWithCypher() {
+		ExecutionEngine engine = new ExecutionEngine(tribe.getDatabase());
+
+		String cql = "start me=node:Person(tribeId='akollegger') " +
+				"match me-[:TradeIn]->mkt<-[:TradeIn]-others, " +
+				"me-[:AtCity]->place<-[:AtCity]-others return distinct others";
+
+
+		Date start = new Date();
+		ExecutionResult result = engine.execute(cql);
+		Date end = new Date();
+		
+		System.out.println("AtCity+TradeIn Cypher traversal found "
+				+ result.size() + " rows");
+		System.out.println("From " + tribe.populationCount() + " traders");
+		System.out.println("In " + ((end.getTime() - start.getTime())) + " milliseconds");
+
+	}
+
 
 	@Test
 	public void shouldFindOtherTradersByCityAndMarket() {
-
 
 		// match me-[:AtCity]->place<-[r2:AtCity]-others,
 		// me-[:TradeIn]->mkt<-[r:TradeIn]-others
