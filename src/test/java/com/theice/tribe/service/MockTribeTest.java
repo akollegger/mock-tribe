@@ -178,16 +178,13 @@ public class MockTribeTest {
 
 		ExecutionResult result = engine.execute(cql);
 		Iterator<Node> traders = result.javaColumnAs("akollegger");
-		assertEquals(traders.next().getProperty("tribeId"), "akollegge");
+		assertEquals(traders.next().getProperty("tribeId"), "akollegger");
 
 	}
 
 	@Test
 	public void shouldFindOtherTradersByCityAndMarket() {
 
-		// start me=node:Person(tribeId="akollegger")
-		Person akollegger = tribe.findPersonIdentifiedBy("akollegger");
-		Node me = template.getNode(akollegger.getId());
 
 		// match me-[:AtCity]->place<-[r2:AtCity]-others,
 		// me-[:TradeIn]->mkt<-[r:TradeIn]-others
@@ -211,6 +208,13 @@ public class MockTribeTest {
 						return Evaluation.EXCLUDE_AND_CONTINUE;
 					}
 				});
+		
+		Date start = new Date();
+
+		// start me=node:Person(tribeId="akollegger")
+		Person akollegger = tribe.findPersonIdentifiedBy("akollegger");
+		Node me = template.getNode(akollegger.getId());
+		
 		Traverser cityResults = cityTraversal.traverse(me);
 
 		Set<Node> citySet = new HashSet<Node>();
@@ -219,33 +223,35 @@ public class MockTribeTest {
 		}
 
 		citySet = filter();
+		Date end = new Date();
 
 		System.out.println("AtCity+TradeIn traversal found "
 				+ matchedNodeMap.size() + " paths");
 		System.out.println("AtCity+TradeIn traversal filtered to "
 				+ citySet.size() + " traders");
 		System.out.println("From " + tribe.populationCount() + " traders");
+		System.out.println("In " + ((end.getTime() - start.getTime())) + " milliseconds");
 	}
 
-	Map<Node, Set<Relationship>> matchedNodeMap = null;
+	Map<Node, Set<String>> matchedNodeMap = null;
 
 	private void record(Node n, Relationship r) {
 		if (matchedNodeMap == null) {
-			matchedNodeMap = new HashMap<Node, Set<Relationship>>();
+			matchedNodeMap = new HashMap<Node, Set<String>>();
 		}
 
-		Set<Relationship> relSet = matchedNodeMap.get(n);
+		Set<String> relSet = matchedNodeMap.get(n);
 		if (relSet == null) {
-			relSet = new HashSet<Relationship>();
+			relSet = new HashSet<String>();
 			matchedNodeMap.put(n, relSet);
 		}
-		relSet.add(r);
+		relSet.add(r.getType().name());
 	}
 
 	private Set<Node> filter() {
 		Set<Node> filtered = new HashSet<Node>();
 
-		for (Entry<Node, Set<Relationship>> e : matchedNodeMap.entrySet()) {
+		for (Entry<Node, Set<String>> e : matchedNodeMap.entrySet()) {
 			if (e.getValue().size() == 2) {
 				filtered.add(e.getKey());
 			}
