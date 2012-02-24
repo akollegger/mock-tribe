@@ -12,6 +12,8 @@ import com.theice.tribe.domain.City;
 import com.theice.tribe.domain.Market;
 import com.theice.tribe.domain.Organization;
 import com.theice.tribe.domain.Person;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.neo4j.graphdb.Direction;
@@ -62,6 +64,7 @@ public class MockTribeTest {
 	private Neo4jTemplate template;
 
 	@Test
+	@Ignore
 	public void shouldMockUpASmallTribe() {
 		Neo4jHelper.cleanDb(template);
 
